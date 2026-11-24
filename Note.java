@@ -10,6 +10,7 @@ import java.util.Objects;
 public class Note {
 
     // Константы (диапазон)
+    //
     private static final int MIN_VALUE = 0;
     private static final int MAX_VALUE = 127;
 
@@ -93,6 +94,7 @@ public class Note {
     }
 
     // Возвращает частоту в герцах, строй A4 = 440 Гц
+    //
     public double frequency() {
         return 440.0 * Math.pow(2.0, (pitch - 69) / 12.0);
     }
@@ -139,4 +141,36 @@ public class Note {
     public String toString() {
         return getName() + " (1/" + durationDen + ", vel " + velocity + ")";
     }
+
+
+    /// Запись и чтение, работа со строкой
+
+    // Возвращается строка для файла: "pitch;durationDen;velocity", например "60;4;80"
+    public String serialize() {
+        return pitch + ";" + durationDen + ";" + velocity;
+    }
+
+    /**
+     * Создаёт ноту из строки, записанной методом serialize()
+     * строка вида "60;4;80"
+     **/
+    public static Note deserialize(String line) {
+        Objects.requireNonNull(line, "Строка не задана"); // Метод из java.util, который проверяет не равен ли объект null
+        String[] parts = line.trim().split(";"); // line.trim() - удаляет все пробельные символы в самом начале и в самом конце строки line
+        // .split(";") - разрезает очищенную строку на части везде, где встречается точка с запятой
+        if (parts.length != 3) { // Проверяем кол-во параметров
+            // IllegalArgumentException если формат неверный
+            throw new IllegalArgumentException("Ожидался формат pitch;durationDen;velocity: \"" + line + "\"");
+        }
+        try { // Преобразуем текст в числа
+            return new Note(
+                    Integer.parseInt(parts[0].trim()),
+                    Integer.parseInt(parts[1].trim()),
+                    Integer.parseInt(parts[2].trim()));
+        } catch (NumberFormatException e) {
+            // IllegalArgumentException если не число; причина e сохраняется
+            throw new IllegalArgumentException("Не число в строке \"" + line + "\"", e);
+        }
+    }
+
 }
